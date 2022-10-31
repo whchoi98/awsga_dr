@@ -432,7 +432,7 @@ Resources:
   LocustEC2SG:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Open-up ports for ICMP and SSH,HTTP/S from All network
+      GroupDescription: Open-up ports for ICMP and SSH,HTTP/S,Locust Web Port from All network
       GroupName:  LocustEC2SG
       VpcId: !Ref VPC
       SecurityGroupIngress:
@@ -452,6 +452,10 @@ Resources:
           CidrIp: 0.0.0.0/0
           FromPort: "443"
           ToPort: "443"
+        - IpProtocol: tcp
+          CidrIp: 0.0.0.0/0
+          FromPort: "8089"
+          ToPort: "8089"        
       Tags:
         - Key: Name
           Value: !Sub '${AWS::StackName}-LocustEC2SG'
@@ -683,3 +687,8 @@ Outputs:
     Export:
       Name: !Sub "${AWS::StackName}-PrivateSubnetB"
 
+  LocustInstance1:
+    Description: LocustInstance1PublicIP
+    Value: !GetAtt LocustInstance1.PublicIp
+    Export:
+      Name: !Sub "LocustInstance1PublicIP"
