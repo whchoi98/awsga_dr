@@ -687,4 +687,4 @@ Outputs:
   Description: Locust IP
   Value: !GetAtt LocustInstance1.PublicIp
   Export:
-    Name: !Sub "${AWS::StackName}-LocustInstance1-Ip"
+    Name: !Sub "${AWS::StackName}-LocustInstance1Ip"
