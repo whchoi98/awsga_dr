@@ -1,0 +1,100 @@
+### Cloud9
+pip3 install --user --upgrade boto3
+export instance_id=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+
+python -c "import boto3
+import os
+from botocore.exceptions import ClientError 
+ec2 = boto3.client('ec2')
+volume_info = ec2.describe_volumes(
+    Filters=[
+        {
+            'Name': 'attachment.instance-id',
+            'Values': [
+                os.getenv('instance_id')
+            ]
+        }
+    ]
+)
+volume_id = volume_info['Volumes'][0]['VolumeId']
+try:
+    resize = ec2.modify_volume(    
+            VolumeId=volume_id,    
+            Size=100
+    )
+    print(resize)
+except ClientError as e:
+    if e.response['Error']['Code'] == 'InvalidParameterValue':
+        print('ERROR MESSAGE: {}'.format(e))"
+if [ $? -eq 0 ]; then
+    sudo reboot
+fi
+
+
+### Cloud9 AWS Cli 2.0 Install
+
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+source ~/.bashrc
+aws --version
+
+which aws_completer
+export PATH=/usr/local/bin:$PATH
+source ~/.bash_profile
+complete -C '/usr/local/bin/aws_completer' aws
+
+### Cloud9 Session Manager Plugin
+curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/linux_64bit/session-manager-plugin.rpm" -o "session-manager-plugin.rpm"
+sudo sudo yum install -y session-manager-plugin.rpm
+
+### Cloud9 util setup
+
+sudo yum -y install jq gettext bash-completion moreutils
+for command in kubectl jq envsubst aws
+  do
+    which $command &>/dev/null && echo "$command in path" || echo "$command NOT FOUND"
+  done
+
+### Cloud9 SSH Key for GWLB VPC EC2 and Appliance EC2
+cd ~/environment/
+ssh-keygen
+### keyname=mykey
+
+cd ~/environment/
+mv ./mykey ./mykey.pem
+chmod 400 ./mykey.pem
+export mykey=mykey
+
+cd ~/environment/
+aws ec2 import-key-pair --key-name "mykey" --public-key-material fileb://./mykey.pub --region ap-northeast-2
+aws ec2 import-key-pair --key-name "mykey" --public-key-material fileb://./mykey.pub --region ap-southeast-1
+
+
+export bucket_name="whchoi1031"
+echo "export bucket_name=${bucket_name}" | tee -a ~/.bash_profile
+aws s3 mb s3://${bucket_name}
+
+aws cloudformation deploy \
+  --region ap-northeast-2 \
+  --stack-name "ICNVPC" \
+  --template-file "/home/ec2-user/environment/ICNVPC.yaml" \
+  --parameter-overrides "KeyPair=$mykey" \
+  --capabilities CAPABILITY_NAMED_IAM \
+  --s3-bucket ${bucket_name}
+
+aws cloudformation deploy \
+  --region ap-southeast-1 \
+  --stack-name "SINVPC" \
+  --template-file "/home/ec2-user/environment/SINVPC.yaml" \
+  --parameter-overrides "KeyPair=$mykey" \
+  --capabilities CAPABILITY_NAMED_IAM
+
+
+
+sudo tcpdump -nvv 'port 6081' | grep 'ICMP'
+sudo tcpdump -nvv 'port 6081' | grep "HTTP: GET"
+sudo tcpdump -nvv 'port 6081' | grep "http"
+sudo tcpdump -nvv 'port 6081' | grep "13.209.89.111"
+
+
