@@ -16,7 +16,7 @@ aws cloudformation deploy \
   --parameter-overrides "KeyPair=$mykey" \
   --capabilities CAPABILITY_NAMED_IAM &
 aws cloudformation deploy \
-  --region ap-southeast-1 \
+  --region ap-northeast-2 \
   --stack-name "Client" \
   --template-file "./Client.yaml" \
   --parameter-overrides "KeyPair=$mykey" \
