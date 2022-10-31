@@ -1754,7 +1754,11 @@ Outputs:
   GlobalAccelerator01DNSName:
     Description: "The Domain Name System (DNS) name that Global Accelerator creates that points to your accelerator's static IP addresses."
     Value: !GetAtt GlobalAccelerator01.DnsName
+    Export:
+      Name: !Sub "GA01URL-Endpoint-NLB2"    
 
   GlobalAccelerator02DNSName:
     Description: "The Domain Name System (DNS) name that Global Accelerator creates that points to your accelerator's static IP addresses."
     Value: !GetAtt GlobalAccelerator02.DnsName
+    Export:
+      Name: !Sub "GA02URL-Endpoint-ALB2"   
