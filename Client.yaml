@@ -683,7 +683,7 @@ Outputs:
     Export:
       Name: !Sub "${AWS::StackName}-PrivateSubnetB"
   
-  LocustInstance1:
+  LocustInstance1IP:
   Description: Locust IP
   Value: !GetAtt LocustInstance1.PublicIp
   Export:
